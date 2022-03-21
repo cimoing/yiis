@@ -11,31 +11,31 @@ class Response extends \yii\web\Response
     /**
      * @var \Swoole\Http\Response
      */
-    private $_r;
+    public $swooleResponse;
 
     public function __construct($config = [])
     {
         parent::__construct($config);
     }
 
-    public function setSwooleResponse($value)
+    public function setswooleResponse($value)
     {
-        $this->_r = $value;
+        $this->swooleResponse = $value;
     }
 
     protected function sendContent()
     {
         if ($this->stream === null) {
-            $this->_r->end($this->content);
+            $this->swooleResponse->end($this->content);
             return;
         }
 
         if (is_callable($this->stream)) {
             $data = call_user_func($this->stream);
             foreach ($data as $datum) {
-                $this->_r->write($datum);
+                $this->swooleResponse->write($datum);
             }
-            $this->_r->end();
+            $this->swooleResponse->end();
             return;
         }
 
@@ -53,13 +53,13 @@ class Response extends \yii\web\Response
                 if ($pos + $chunkSize > $end) {
                     $chunkSize = $end - $pos + 1;
                 }
-                $this->_r->write(fread($handle, $chunkSize));
+                $this->swooleResponse->write(fread($handle, $chunkSize));
                 flush();
             }
             fclose($handle);
         } else {
             while (!feof($this->stream)) {
-                $this->_r->write(fread($this->stream, $chunkSize));
+                $this->swooleResponse->write(fread($this->stream, $chunkSize));
                 flush();
             }
             fclose($this->stream);
@@ -72,11 +72,11 @@ class Response extends \yii\web\Response
         if ($headers) {
             foreach ($headers as $name => $values) {
                 foreach ($values as $value) {
-                    $this->_r->header($name, $value);
+                    $this->swooleResponse->header($name, $value);
                 }
             }
         }
-        $this->_r->setStatusCode($this->getStatusCode());
+        $this->swooleResponse->setStatusCode($this->getStatusCode());
 
         $this->sendCookies();
     }
@@ -101,7 +101,7 @@ class Response extends \yii\web\Response
                 $value = Yii::$app->getSecurity()->hashData(serialize([$cookie->name, $value]), $validationKey);
             }
 
-            $this->_r->setCookie(
+            $this->swooleResponse->setCookie(
                 $cookie->name,
                 $value,
                 $cookie->expire,
