@@ -66,6 +66,11 @@
             ]
         }
     },
+    "autoload": {
+        "psr-4": {
+            "app\\yiis\\": "yiis"
+        }
+    },
     "repositories": [
         {
             "type": "composer",

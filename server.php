@@ -21,7 +21,7 @@ $server->on('Request', function ($request, $response) {
     $config['components']['response']['swooleResponse'] = $response;
 
 
-    (new app\yiis\web\Application($config))->run();
+    (new \app\yiis\web\Application($config))->run();
 
     $response->end();
 });
