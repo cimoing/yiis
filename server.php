@@ -13,5 +13,15 @@ $server = new Swoole\Http\Server('127.0.0.1', 9501);
 $server->on('Request', function ($request, $response) {
     $config = require __DIR__ . '/config/web.php';
 
+    $config['components']['request']['swooleRequest'] = $request;
+
+    if (!isset($config['components']['response'])) {
+        $config['components']['response'] = [];
+    }
+    $config['components']['response']['swooleResponse'] = $response;
+
+
     (new yii\web\Application($config))->run();
+
+    $response->end();
 });
