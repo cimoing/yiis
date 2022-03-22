@@ -21,7 +21,9 @@ class Response extends \yii\web\Response
     {
         if ($this->stream === null) {
             //$this->swooleResponse->header("Content-Length", strlen($this->content));
-            $this->swooleResponse->write($this->content);
+            if ($this->content) {
+                $this->swooleResponse->write($this->content);
+            }
             //$this->swooleResponse->write("abc");
             $this->swooleResponse->end();
             return;

@@ -7,6 +7,9 @@ use Yii;
 use yii\base\InvalidConfigException;
 use yii\web\HeaderCollection;
 
+/**
+ * @property-read \Swoole\Http\Request $swooleRequest
+ */
 class Request extends \yii\web\Request
 {
     private $_headers;
@@ -54,12 +57,12 @@ class Request extends \yii\web\Request
         return $this->swooleRequest->rawContent();
     }
 
-    private $_bodyParams;
+    private $_bodyParams = null;
 
     public function getBodyParams()
     {
         if ($this->_bodyParams === null) {
-            if (isset($this->swooleRequest->post[$this->methodParam])) {
+            if ($this->swooleRequest->post) {
                 $this->_bodyParams = $this->swooleRequest->post;
                 unset($this->_bodyParams[$this->methodParam]);
                 return $this->_bodyParams;
@@ -70,6 +73,11 @@ class Request extends \yii\web\Request
         }
 
         return $this->_bodyParams;
+    }
+
+    public function setBodyParams($values)
+    {
+        $this->_bodyParams = $values;
     }
 
     private $_queryParams;
@@ -287,5 +295,48 @@ class Request extends \yii\web\Request
         }
 
         return $this->headers->get('Content-Type') ?: '';
+    }
+
+    protected function loadCookies()
+    {
+        $cookies = [];
+        if ($this->enableCookieValidation) {
+            if ($this->cookieValidationKey == '') {
+                throw new InvalidConfigException(get_class($this) . '::cookieValidationKey must be configured with a secret key.');
+            }
+            foreach ($this->swooleRequest->cookie as $name => $value) {
+                if (!is_string($value)) {
+                    continue;
+                }
+                $data = Yii::$app->getSecurity()->validateData($value, $this->cookieValidationKey);
+                if ($data === false) {
+                    continue;
+                }
+                if (defined('PHP_VERSION_ID') && PHP_VERSION_ID >= 70000) {
+                    $data = @unserialize($data, ['allowed_classes' => false]);
+                } else {
+                    $data = @unserialize($data);
+                }
+                if (is_array($data) && isset($data[0], $data[1]) && $data[0] === $name) {
+                    $cookies[$name] = Yii::createObject([
+                        'class' => 'yii\web\Cookie',
+                        'name' => $name,
+                        'value' => $data[1],
+                        'expire' => null,
+                    ]);
+                }
+            }
+        } else {
+            foreach ($this->swooleRequest->cookie as $name => $value) {
+                $cookies[$name] = Yii::createObject([
+                    'class' => 'yii\web\Cookie',
+                    'name' => $name,
+                    'value' => $value,
+                    'expire' => null,
+                ]);
+            }
+        }
+
+        return $cookies;
     }
 }

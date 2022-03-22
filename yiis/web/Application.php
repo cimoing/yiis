@@ -2,6 +2,7 @@
 
 namespace app\yiis\web;
 
+use Swoole\Coroutine;
 use Yii;
 use Swoole\ExitException;
 use yii\base\Component;
@@ -48,20 +49,32 @@ class Application extends \yii\web\Application
             return parent::run();
         } catch (\Throwable $e) {
             echo sprintf("error %s:%d %s\n", $e->getFile(), $e->getLine(), $e->getMessage());
+
+            $content = print_r(Coroutine::getBackTrace(), true);
+
             $response = $this->getResponse();
             $response->setStatusCode(500);
-            $response->content = "exception " . $e->getMessage();
+            $response->content = "exception " . $e->getMessage() . PHP_EOL . $content;
             $this->getResponse()->send();
+        }
+        foreach ($this->getLog()->targets as $target) {
+            $target->export();
         }
     }
 
     protected function initRequest()
     {
-        $this->_view = Yii::createObject($this->_config['components']['view']);
-        $this->_request = Yii::createObject($this->_config['components']['request']);
-        $this->_response = Yii::createObject($this->_config['components']['response']);
+        $context = Coroutine::getContext();
+
+        $this->set('request', $this->_config['components']['request']);
+        $this->set('response', $this->_config['components']['response']);
+        $this->set('view', $this->_config['components']['view']);
+        $this->set('session', $this->_config['components']['session']);
+        $context['_view']  = Yii::createObject($this->_config['components']['view']);
+        $context['_request'] = Yii::createObject($this->_config['components']['request']);
+        $context['_response'] = Yii::createObject($this->_config['components']['response']);
         $this->getResponse()->clear();
-        $this->_session = Yii::createObject($this->_config['components']['session']);
+        $context['_session'] = Yii::createObject($this->_config['components']['session']);
 
         $session = $this->getSession();
         $session->open();
@@ -78,28 +91,32 @@ class Application extends \yii\web\Application
     private $_view;
     public function getView()
     {
-        return $this->_view;
+        $context = Coroutine::getContext();
+        return $context['_view'];
     }
 
     private $_request;
 
     public function getRequest()
     {
-        return $this->_request;
+        $context = Coroutine::getContext();
+        return $context['_request'];
     }
 
     private $_response;
 
     public function getResponse()
     {
-        return $this->_response;
+        $context = Coroutine::getContext();
+        return $context['_response'];
     }
 
     private $_session;
 
     public function getSession()
     {
-        return $this->_session;
+        $context = Coroutine::getContext();
+        return $context['_session'];
     }
 
     public function end($status = 0, $response = null)
