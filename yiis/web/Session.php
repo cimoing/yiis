@@ -13,4 +13,9 @@ class Session extends \yii\web\Session
             $this->updateFlashCounters();
         }
     }
+
+    public function getIsActive()
+    {
+        return true;
+    }
 }
