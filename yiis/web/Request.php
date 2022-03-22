@@ -300,11 +300,17 @@ class Request extends \yii\web\Request
     protected function loadCookies()
     {
         $cookies = [];
+
+        $values = $this->swooleRequest->cookie ?? [];
+
         if ($this->enableCookieValidation) {
             if ($this->cookieValidationKey == '') {
                 throw new InvalidConfigException(get_class($this) . '::cookieValidationKey must be configured with a secret key.');
             }
-            foreach ($this->swooleRequest->cookie as $name => $value) {
+
+
+
+            foreach ($values as $name => $value) {
                 if (!is_string($value)) {
                     continue;
                 }
@@ -327,7 +333,7 @@ class Request extends \yii\web\Request
                 }
             }
         } else {
-            foreach ($this->swooleRequest->cookie as $name => $value) {
+            foreach ($values as $name => $value) {
                 $cookies[$name] = Yii::createObject([
                     'class' => 'yii\web\Cookie',
                     'name' => $name,
