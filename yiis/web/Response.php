@@ -108,7 +108,8 @@ class Response extends \yii\web\Response
         }
 
         $session = Yii::$app->getSession();
-        if ($session->useCookies) {
+
+        if ($session->getIsActive() && $session->useCookies) {
             $params = $session->getCookieParams();
 
             $this->swooleResponse->setCookie(
@@ -120,6 +121,7 @@ class Response extends \yii\web\Response
                 $params['secure'],
                 $params['httponly'],
             );
+            $session->close();
         }
 
     }

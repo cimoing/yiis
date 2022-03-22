@@ -46,7 +46,7 @@ class Application extends \yii\web\Application
 
         try {
             return parent::run();
-        } catch (\Exception|\Throwable $e) {
+        } catch (\Throwable $e) {
             echo sprintf("error %s:%d %s\n", $e->getFile(), $e->getLine(), $e->getMessage());
             $response = $this->getResponse();
             $response->setStatusCode(500);
@@ -64,9 +64,7 @@ class Application extends \yii\web\Application
         $this->_session = Yii::createObject($this->_config['components']['session']);
 
         $session = $this->getSession();
-        if ($session->getIsActive()) {
-            $session->destroy();
-        }
+        $session->open();
         if ($session->useCookies) {
             $name = $session->getName();
             if (isset($this->getRequest()->swooleRequest->cookies[$name])) {
