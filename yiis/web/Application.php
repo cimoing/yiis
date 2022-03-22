@@ -2,8 +2,25 @@
 
 namespace app\yiis\web;
 
+use Yii;
+
 class Application extends \yii\web\Application
 {
+    public function init()
+    {
+        $this->_request = parent::getRequest();
+        $this->_response = parent::getResponse();
+        $this->_session = parent::getSession();
+        parent::init();
+    }
+
+    protected function bootstrap()
+    {
+        Yii::setAlias('@webroot', APP_PATH . '/web');
+        Yii::setAlias('@web', '/');
+        \yii\base\Application::bootstrap();
+    }
+
     public function coreComponents()
     {
         return array_merge(parent::coreComponents(), [
@@ -21,11 +38,6 @@ class Application extends \yii\web\Application
         return $this->_request;
     }
 
-    public function setRequest(array $config)
-    {
-        \Yii::$container->clear($config['class']);
-        $this->_request = \Yii::createObject($config);
-    }
 
     private $_response;
 
@@ -34,23 +46,11 @@ class Application extends \yii\web\Application
         return $this->_response;
     }
 
-    public function setResponse(array $config)
-    {
-        \Yii::$container->clear($config['class']);
-        $this->_response = \Yii::createObject($config);
-    }
-
     private $_session;
 
     public function getSession()
     {
         return $this->_session;
-    }
-
-    public function setSession(array $config)
-    {
-        \Yii::$container->clear($config['class']);
-        $this->_session = \Yii::createObject($config);
     }
 
     // @TODO 重写为连接池

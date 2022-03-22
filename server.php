@@ -2,6 +2,7 @@
 
 defined('YII_DEBUG') or define('YII_DEBUG', true);
 defined('YII_ENV') or define('YII_ENV', 'dev');
+const APP_PATH = __DIR__;
 
 require __DIR__ . '/vendor/autoload.php';
 
@@ -22,8 +23,6 @@ $server->on('Request', function ($request, $response) {
 
 
     (new \app\yiis\web\Application($config))->run();
-
-    $response->end();
 });
 
 $server->start();
