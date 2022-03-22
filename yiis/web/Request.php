@@ -2,6 +2,7 @@
 
 namespace app\yiis\web;
 
+use Swoole\Coroutine;
 use Swoole\Http\Request as SwooleRequest;
 use Yii;
 use yii\base\InvalidConfigException;
@@ -9,21 +10,12 @@ use yii\web\HeaderCollection;
 
 class Request extends \yii\web\Request
 {
-    /**
-     * @var SwooleRequest|null
-     */
-    public $swooleRequest;
-
     private $_headers;
-
-    public function setswooleRequest($swooleRequest)
-    {
-        $this->swooleRequest = $swooleRequest;
-    }
 
     public function getSwooleRequest()
     {
-        return $this->swooleRequest;
+        $context = Coroutine::getContext();
+        return $context['request'];
     }
 
     public function getHeaders()

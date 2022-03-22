@@ -11,22 +11,27 @@ require __DIR__ . '/vendor/yiisoft/yii2/Yii.php';
 
 $server = new Swoole\Http\Server('0.0.0.0', 9501);
 $server->set([
+    'worker_num' => 4,
     'enable_static_handler' => true,
     'document_root' => APP_PATH . '/web',
 ]);
 
-$server->on('Request', function ($request, $response) {
+$server->on('WorkerStart', function (\Swoole\Server $server, int $workerId) {
     $config = require __DIR__ . '/config/web.php';
 
-    $config['components']['request']['swooleRequest'] = $request;
 
     if (!isset($config['components']['response'])) {
         $config['components']['response'] = [];
     }
-    $config['components']['response']['swooleResponse'] = $response;
     Yii::$container = new \app\yiis\di\Container();
+    new \app\yiis\web\Application($config);
+});
 
-    (new \app\yiis\web\Application($config))->run();
+$server->on('Request', function ($request, $response) {
+    $context = \Swoole\Coroutine::getContext();
+    $context['request'] = $request;
+    $context['response'] = $response;
+    Yii::$app->run();
 });
 
 $server->start();

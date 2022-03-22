@@ -4,11 +4,24 @@ namespace app\yiis\web;
 
 use Yii;
 use Swoole\ExitException;
-use app\yiis\di\AbstractModule;
+use yii\base\Component;
 
 class Application extends \yii\web\Application
 {
-    use AbstractModule;
+    private $_config;
+
+    public function __construct($config = [])
+    {
+        Yii::$app = $this;
+        static::setInstance($this);
+
+        $this->state = self::STATE_BEGIN;
+
+        $this->preInit($config);
+        $this->_config = $config;
+
+        Component::__construct($config);
+    }
 
     protected function bootstrap()
     {
@@ -25,6 +38,50 @@ class Application extends \yii\web\Application
             'session' => ['class' => Session::class],
             'errorHandler' => ['class' => 'yii\web\ErrorHandler'],
         ]);
+    }
+
+    public function run()
+    {
+        $this->initRequest();
+
+        try {
+            return parent::run();
+        } catch (\Exception|\Throwable $e) {
+            echo sprintf("error %s:%d %s\n", $e->getFile(), $e->getLine(), $e->getMessage());
+            $response = $this->getResponse();
+            $response->setStatusCode(500);
+            $response->content = "exception " . $e->getMessage();
+            $this->getResponse()->send();
+        }
+    }
+
+    protected function initRequest()
+    {
+        $this->_request = Yii::createObject($this->_config['components']['request']);
+        $this->_response = Yii::createObject($this->_config['components']['response']);
+        $this->getResponse()->clear();
+        $this->_session = Yii::createObject($this->_config['components']['session']);
+    }
+
+    private $_request;
+
+    public function getRequest()
+    {
+        return $this->_request;
+    }
+
+    private $_response;
+
+    public function getResponse()
+    {
+        return $this->_response;
+    }
+
+    private $_session;
+
+    public function getSession()
+    {
+        return $this->_session;
     }
 
     public function end($status = 0, $response = null)

@@ -6,27 +6,24 @@ use Swoole\Coroutine;
 use Yii;
 use yii\base\InvalidConfigException;
 
+/**
+ * @property-read \Swoole\Http\Response $swooleResponse
+ */
 class Response extends \yii\web\Response
 {
-    /**
-     * @var \Swoole\Http\Response
-     */
-    public $swooleResponse;
-
-    public function __construct($config = [])
+    public function getSwooleResponse()
     {
-        parent::__construct($config);
-    }
-
-    public function setswooleResponse($value)
-    {
-        $this->swooleResponse = $value;
+        $context = Coroutine::getContext();
+        return $context['response'];
     }
 
     protected function sendContent()
     {
         if ($this->stream === null) {
-            $this->swooleResponse->end($this->content);
+            //$this->swooleResponse->header("Content-Length", strlen($this->content));
+            $this->swooleResponse->write($this->content);
+            //$this->swooleResponse->write("abc");
+            $this->swooleResponse->end();
             return;
         }
 
