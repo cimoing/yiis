@@ -81,9 +81,6 @@ class Response extends \yii\web\Response
     protected function sendCookies()
     {
         $cookies = $this->getCookies();
-        if ($cookies->count() === 0) {
-            return;
-        }
 
         $request = Yii::$app->getRequest();
         if ($request->enableCookieValidation) {
@@ -109,5 +106,21 @@ class Response extends \yii\web\Response
                 !empty($cookie->sameSite) ? $cookie->sameSite : null
             );
         }
+
+        $session = Yii::$app->getSession();
+        if ($session->useCookies) {
+            $params = $session->getCookieParams();
+
+            $this->swooleResponse->setCookie(
+                $session->getName(),
+                $session->getId(),
+                 $params['lifetime'] + ($params['lifetime'] > 0 ? time() : 0),
+                $params['path'],
+                $params['domain'],
+                $params['secure'],
+                $params['httponly'],
+            );
+        }
+
     }
 }

@@ -3,7 +3,6 @@
 namespace app\yiis\web;
 
 use Swoole\Coroutine;
-use Swoole\Http\Request as SwooleRequest;
 use Yii;
 use yii\base\InvalidConfigException;
 use yii\web\HeaderCollection;

@@ -57,10 +57,30 @@ class Application extends \yii\web\Application
 
     protected function initRequest()
     {
+        $this->_view = Yii::createObject($this->_config['components']['view']);
         $this->_request = Yii::createObject($this->_config['components']['request']);
         $this->_response = Yii::createObject($this->_config['components']['response']);
         $this->getResponse()->clear();
         $this->_session = Yii::createObject($this->_config['components']['session']);
+
+        $session = $this->getSession();
+        if ($session->getIsActive()) {
+            $session->destroy();
+        }
+        if ($session->useCookies) {
+            $name = $session->getName();
+            if (isset($this->getRequest()->swooleRequest->cookies[$name])) {
+                $session->setId($this->getRequest()->swooleRequest->cookies[$name]);
+            } else {
+                $session->regenerateID(true);
+            }
+        }
+    }
+
+    private $_view;
+    public function getView()
+    {
+        return $this->_view;
     }
 
     private $_request;
