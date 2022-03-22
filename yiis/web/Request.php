@@ -122,7 +122,7 @@ class Request extends \yii\web\Request
     public function getScriptUrl()
     {
         if ($this->_scriptUrl === null) {
-            return Yii::getAlias('@app/server.php');
+            return '/index.php';
         }
 
         return $this->_scriptUrl;
