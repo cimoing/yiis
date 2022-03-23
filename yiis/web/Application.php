@@ -56,9 +56,15 @@ class Application extends \yii\web\Application
             $response->setStatusCode(500);
             $response->content = "exception " . $e->getMessage() . PHP_EOL . $content;
             $this->getResponse()->send();
-        }
-        foreach ($this->getLog()->targets as $target) {
-            $target->export();
+        } finally {
+            /*
+            foreach ($this->getLog()->targets as $target) {
+                $target->export();
+            }
+            */
+
+            // release connection
+            $this->get('redis')->close();
         }
     }
 

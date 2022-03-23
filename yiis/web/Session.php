@@ -45,7 +45,7 @@ class Session extends \yii\web\CacheSession
             $this->updateFlashCounters();
         } else {
             $error = error_get_last();
-            $message = isset($error['message']) ? $error['message'] : 'Failed to start session.';
+            $message = isset($error['message']) ? \json_encode($error) : 'Failed to start session.';
             Yii::error($message, __METHOD__);
         }
     }

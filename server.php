@@ -1,4 +1,5 @@
 <?php
+\Swoole\Runtime::enableCoroutine();
 
 defined('YII_DEBUG') or define('YII_DEBUG', true);
 defined('YII_ENV') or define('YII_ENV', 'production');
@@ -11,8 +12,8 @@ require __DIR__ . '/vendor/yiisoft/yii2/Yii.php';
 
 $server = new Swoole\Http\Server('0.0.0.0', 9501);
 $server->set([
-    'worker_num' => 24,
-    'reactor_num' => 24,
+    'worker_num' => 16,
+    'reactor_num' => 16,
     'enable_static_handler' => true,
     'document_root' => APP_PATH . '/web',
 ]);

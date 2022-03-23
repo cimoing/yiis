@@ -16,7 +16,7 @@ class Connection extends \yii\redis\Connection
     /**
      * @var RedisPool
      */
-    private $_sPool;
+    private static $_sPool;
 
     public function init()
     {
@@ -26,6 +26,10 @@ class Connection extends \yii\redis\Connection
 
     private function initPool()
     {
+        if (!is_null(self::$_sPool)) {
+            return;
+        }
+
         $config = new RedisConfig();
         $config->withHost($this->hostname)
             ->withPort($this->port)
@@ -34,8 +38,7 @@ class Connection extends \yii\redis\Connection
             ->withTimeout($this->dataTimeout ?? 5.0)
             ->withReadTimeout(1.0)
             ->withRetryInterval(3);
-
-        $this->_sPool = new RedisPool($config);
+        self::$_sPool = new RedisPool($config);
     }
 
     public function getIsActive()
@@ -47,7 +50,7 @@ class Connection extends \yii\redis\Connection
     {
         $context = Coroutine::getContext();
         if (!isset($context[self::CONTEXT_KEY])) {
-            $redis = $this->_sPool->get();
+            $redis = self::$_sPool->get();
 
             if (!$redis->isConnected()) {
                 \Yii::error("redis 连接丢失");
@@ -62,7 +65,9 @@ class Connection extends \yii\redis\Connection
     {
         $redis = $this->socket;
         if ($redis) {
-            $this->_sPool->put($redis);
+            $context = Coroutine::getContext();
+            unset($context[self::CONTEXT_KEY]);
+            self::$_sPool->put($redis);
         }
     }
 
