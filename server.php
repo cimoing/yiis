@@ -11,7 +11,8 @@ require __DIR__ . '/vendor/yiisoft/yii2/Yii.php';
 
 $server = new Swoole\Http\Server('0.0.0.0', 9501);
 $server->set([
-    'worker_num' => 4,
+    'worker_num' => 24,
+    'reactor_num' => 24,
     'enable_static_handler' => true,
     'document_root' => APP_PATH . '/web',
 ]);
@@ -22,7 +23,6 @@ $server->on('WorkerStart', function (\Swoole\Server $server, $workerId) {
     if (!isset($config['components']['response'])) {
         $config['components']['response'] = [];
     }
-    Yii::$container = new \app\yiis\di\Container();
     new \app\yiis\web\Application($config);
 });
 

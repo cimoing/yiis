@@ -66,10 +66,13 @@ class Application extends \yii\web\Application
     {
         $context = Coroutine::getContext();
 
+        // reset state object
         $this->set('request', $this->_config['components']['request']);
         $this->set('response', $this->_config['components']['response']);
         $this->set('view', $this->_config['components']['view']);
         $this->set('session', $this->_config['components']['session']);
+        $this->set('redis', $this->_config['components']['redis']);
+        $this->set('cache', $this->_config['components']['cache']);
         $context['_view']  = Yii::createObject($this->_config['components']['view']);
         $context['_request'] = Yii::createObject($this->_config['components']['request']);
         $context['_response'] = Yii::createObject($this->_config['components']['response']);

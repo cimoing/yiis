@@ -16,8 +16,11 @@ $config = [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => '_PpAfLk8dZ9viGUHyIr9AAFvUteA4pp_',
         ],
+        'redis' => [
+            'class' => app\yiis\redis\Connection::class,
+        ],
         'cache' => [
-            'class' => 'yii\caching\FileCache',
+            'class' => \yii\redis\Cache::class,
         ],
         'user' => [
             'identityClass' => 'app\models\User',
@@ -38,7 +41,8 @@ $config = [
             'targets' => [
                 [
                     'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'warning', 'info', 'trace'],
+                    'levels' => ['error', 'warning',],
+                    'logVars' => [],
                 ],
             ],
         ],
