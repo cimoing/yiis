@@ -31,7 +31,9 @@ class Connection extends \yii\redis\Connection
             ->withPort($this->port)
             ->withAuth((string) $this->password)
             ->withDbIndex($this->database)
-            ->withTimeout($this->dataTimeout ?? 1.0);
+            ->withTimeout($this->dataTimeout ?? 5.0)
+            ->withReadTimeout(1.0)
+            ->withRetryInterval(3);
 
         $this->_sPool = new RedisPool($config);
     }
@@ -45,8 +47,14 @@ class Connection extends \yii\redis\Connection
     {
         $context = Coroutine::getContext();
         if (!isset($context[self::CONTEXT_KEY])) {
-            $context[self::CONTEXT_KEY] = $this->_sPool->get();
-            $this->initConnection();
+            $redis = $this->_sPool->get();
+
+            if (!$redis->isConnected()) {
+                \Yii::error("redis 连接丢失");
+            } else {
+                $context[self::CONTEXT_KEY] = $redis;
+                $this->initConnection();
+            }
         }
     }
 

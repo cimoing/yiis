@@ -80,7 +80,7 @@ class Application extends \yii\web\Application
         $context['_session'] = Yii::createObject($this->_config['components']['session']);
 
         $session = $this->getSession();
-        $session->open();
+        $session->openSession('', '');
         if ($session->useCookies) {
             $name = $session->getName();
             if (isset($this->getRequest()->swooleRequest->cookies[$name])) {
