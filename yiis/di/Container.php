@@ -4,7 +4,6 @@ namespace app\yiis\di;
 
 use ReflectionClass;
 use ReflectionException;
-use ReflectionNamedType;
 use Swoole\Coroutine;
 use yii\base\InvalidConfigException;
 use yii\di\Instance;
@@ -178,7 +177,7 @@ class Container extends \yii\di\Container
                 if (PHP_VERSION_ID >= 80000) {
                     $c = $param->getType();
                     $isClass = false;
-                    if ($c instanceof ReflectionNamedType) {
+                    if ($c instanceof \ReflectionNamedType) {
                         $isClass = !$c->isBuiltin();
                     }
                 } else {
@@ -187,9 +186,9 @@ class Container extends \yii\di\Container
                     } catch (ReflectionException $e) {
                         if (!$this->isNulledParam($param)) {
                             $notInstantiableClass = null;
-                            if (PHP_VERSION_ID >= 70000) {
+                            if (PHP_VERSION_ID >= 70100) {
                                 $type = $param->getType();
-                                if ($type instanceof ReflectionNamedType) {
+                                if ($type instanceof \ReflectionNamedType) {
                                     $notInstantiableClass = $type->getName();
                                 }
                             }

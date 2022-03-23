@@ -16,9 +16,8 @@ $server->set([
     'document_root' => APP_PATH . '/web',
 ]);
 
-$server->on('WorkerStart', function (\Swoole\Server $server, int $workerId) {
+$server->on('WorkerStart', function (\Swoole\Server $server, $workerId) {
     $config = require __DIR__ . '/config/web.php';
-
 
     if (!isset($config['components']['response'])) {
         $config['components']['response'] = [];
